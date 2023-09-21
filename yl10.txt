@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Küsi kasutajanime
+read -p "Sisesta kasutajanimi: " kasutajanimi
+
+# Küsi parool (peidetud sisend)
+read -s -p "Sisesta parool: " parool
+echo
+
+# Küsi grupi nime või kasuta vaikimisi "kylaline"
+read -p "Sisesta grupi nimi (vajuta ENTER vaikimisi grupi loomiseks): " grupinimi
+grupinimi=${grupinimi:-kylaline}  # Kui grupinimi on tühi, siis kasutatakse "kylaline"
+
+# Loome uue kasutaja ja määratleme parooli
+sudo useradd -m -p $(openssl passwd -1 $parool) -G $grupinimi $kasutajanimi
+
+# Loome kataloogi ja faili kasutaja kodukataloogi
+kataloogi_tee="/home/$kasutajanimi/kataloog"
+failinimi="teretulemast_$kasutajanimi.txt"
+
+mkdir -p $kataloogi_tee  # Loome kausta, kui see ei eksisteeri
+touch "$kataloogi_tee/$failinimi"  # Loome faili
+
+# Anname failile omanikuõigused
+chown $kasutajanimi:$kasutajanimi "$kataloogi_tee/$failinimi"
+
+echo "Kasutaja $kasutajanimi on loodud grupiga $grupinimi."
+echo "Kataloog ja fail on loodud aadressil: $kataloogi_tee/$failinimi"

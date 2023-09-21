@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Kasutame awk käsku /etc/passwd faili lugemiseks ja kasutajate eraldamiseks
+# Kasutajad on /etc/passwd failis eraldatud ":" tähisega, nii et kasutame ":" välja eraldamiseks
+
+# Kuvame kasutajate kasutajanimed
+awk -F: '$3 >= 1000 && $3 < 65534 {print $1}' /etc/passwd
+
+
+#!/bin/bash
+
+# Kontrolli, kas on antud vähemalt üks argument (nimekirja fail)
+if [ $# -lt 1 ]; then
+    echo "Kasutusjuhend: $0 <nimekirja_fail>"
+    exit 1
+fi
+
+# Salvesta nimekirja faili tee muutujasse
+nimekirja_fail="$1"
+
+# Kontrolli, kas antud tee viitab eksisteerivale failile
+if [ ! -f "$nimekirja_fail" ]; then
+    echo "Hoiatus: Fail $nimekirja_fail ei eksisteeri!"
+    exit 1
+fi
+
+# Loo kasutajad nimekirja põhjal
+while IFS= read -r nimi; do
+    # Teisenda nimi väiketähtedeks
+    nimi=$(echo "$nimi" | tr '[:upper:]' '[:lower:]')
+    
+    # Asenda täpitähed "õüäö" "ouao" vastu
+    nimi=$(echo "$nimi" | sed 's/ä/a/g; s/ö/o/g; s/ü/u/g; s/õ/o/g')
+    
+    # Loome kasutajanime
+    kasutajanimi=$(echo "$nimi" | sed 's/ /./g')
+    
+    # Genereeri juhuslik parool
+    parool=$(date +%s%N${RANDOM}${RANDOM} | sha256sum | head -c12)
+    
+    # Lisa kasutaja süsteemi ja määra loodud parool
+    sudo useradd -m -p $(openssl passwd -1 $parool) $kasutajanimi
+    
+    # Väljasta kasutajanimi ja parool
+    echo "$kasutajanimi $parool"
+done < "$nimekirja_fail"

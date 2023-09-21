@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Skript väljastab minu nime ja kursuse
+nimi="ChatGPT"
+kursus="AI ja masinõpe"
+
+echo "Minu nimi on: $nimi"
+echo "Õpin kursusel: $kursus"

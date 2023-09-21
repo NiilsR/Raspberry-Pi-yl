@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Funktsioon varundamiseks
+varunda() {
+    # Kontrolli, kas on antud vähemalt üks argument (faili tee)
+    if [ $# -lt 1 ]; then
+        echo "Kasutusjuhend: varunda <faili_tee>"
+        return 1
+    fi
+
+    # Võta faili tee esimesest argumendist
+    faili_tee="$1"
+
+    # Kontrolli, kas fail eksisteerib
+    if [ ! -f "$faili_tee" ]; then
+        echo "Hoiatus: Fail $faili_tee ei eksisteeri!"
+        return 1
+    fi
+
+    # Võta faili nimi
+    faili_nimi=$(basename "$faili_tee")
+
+    # Moodusta varukoopia failinimi
+    kuupäev_kellaeg=$(date +'%Y-%m-%d_%H-%M-%S')
+    varundatud_faili_nimi="${faili_nimi%%.*}_${kuupäev_kellaeg}.${faili_nimi##*.}"
+
+    # Määratle varundamise kataloog
+    varundamise_kataloog="${faili_tee%/*}/backup"
+
+    # Kontrolli, kas varundamise kataloog eksisteerib, ja loo see vajadusel
+    if [ ! -d "$varundamise_kataloog" ]; then
+        mkdir -p "$varundamise_kataloog"
+    fi
+
+    # Tee varundus
+    cp "$faili_tee" "$varundamise_kataloog/$varundatud_faili_nimi"
+    echo "Fail $faili_tee on varundatud kui $varundamise_kataloog/$varundatud_faili_nimi"
+}
+
+# Kasutage funktsiooni
+varunda "/kodu/kasutaja/minufail.txt"

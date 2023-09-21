@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Küsi kasutajalt teenuse nimi
+read -p "Sisesta teenuse nimi: " teenuse_nimi
+
+# Kontrolli, kas teenus on aktiivne ja töötab
+if systemctl is-active --quiet $teenuse_nimi; then
+    echo "$teenuse_nimi on aktiivne ja töötab."
+else
+    echo "Hoiatus: $teenuse_nimi ei ole aktiivne!"
+fi
+
+
+
+
+#!/bin/bash
+
+# Kontrolli, kas on antud vähemalt kaks argumendit
+if [ $# -lt 2 ]; then
+    echo "Kasutusjuhend: $0 <faili_tee> <soovitud_õigused>"
+    exit 1
+fi
+
+# Salvesta argumendid muutujatesse
+faili_tee="$1"
+soovitud_oigused="$2"
+
+# Kontrolli, kas fail on olemas
+if [ -e "$faili_tee" ]; then
+    # Kontrolli, kas antud tee viitab failile (mitte kataloogile)
+    if [ -f "$faili_tee" ]; then
+        # Leia faili tegelikud õigused
+        tegelikud_oigused=$(stat -c %a "$faili_tee")
+
+        # Kontrolli, kas tegelikud õigused vastavad soovitud õigustele
+        if [ "$tegelikud_oigused" -eq "$soovitud_oigused" ]; then
+            echo "Fail $faili_tee on olemas ja õigustega korrektselt määratud."
+        else
+            echo "Hoiatus: Faili $faili_tee õigused on $tegelikud_oigused, peaksid olema $soovitud_oigused!"
+        fi
+    else
+        echo "Hoiatus: $faili_tee pole fail!"
+    fi
+else
+    echo "Hoiatus: Fail $faili_tee ei eksisteeri!"
+fi
